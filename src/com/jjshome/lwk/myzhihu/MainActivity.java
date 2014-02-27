@@ -57,8 +57,8 @@ public class MainActivity extends Activity {
        getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_main);
 /*
-       利用LayoutInflater动态载入XML布局文件，并且实例化，并且使用inflate返回一个View
-       对象，且将ViewGroup设置为null，将此View作为根
+ *     利用LayoutInflater动态载入XML布局文件，并且实例化，并且使用inflate返回一个View
+ *     对象，且将ViewGroup设置为null，将此View作为根
 */
 
 		head = LayoutInflater.from(this).inflate(R.layout.item_main_viewheader,
@@ -66,6 +66,7 @@ public class MainActivity extends Activity {
 
 		MainLv = (PinnedSectionListView) findViewById(R.id.main_list);
 
+       /*调用了PinnedSectionListView中的方法，为TopView设置了ImageView*/
 		MainLv.setTopView((ImageView)findViewById(R.id.iv_top));
 		
 		MainLv.setHeadView(head);

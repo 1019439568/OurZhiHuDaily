@@ -195,11 +195,17 @@ public class HoloCircleSeekBar extends View {
 		final TypedArray a = getContext().obtainStyledAttributes(attrs,
 				R.styleable.HoloCircleSeekBar, defStyle, 0);
 
+       /*将XML中定义的属性进行传值*/
 		initAttributes(a);
 
+       /*回收使用过的数组，为后面的再使用*/
 		a.recycle();
 		// mAngle = (float) (-Math.PI / 2);
 
+       /*设置画笔能够反锯齿绘图
+        * setShader(s)设置着色器对象
+        * setStrokeWidth设置笔锋宽度
+       */
 		mColorWheelPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mColorWheelPaint.setShader(s);
 		mColorWheelPaint.setColor(unactive_wheel_color);
