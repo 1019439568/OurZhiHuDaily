@@ -46,6 +46,9 @@ import com.jjshome.lwk.myzhihu.R;
 
 /**
  * ListView, which is capable to pin section views at its top while the rest is still scrolled.
+ * 这个类是非常关键的一个自定义View的类，主要是实现了ListView的顶部固定以及一些小的功能，这个里面有个单词非常关键
+ * 如果不理解可能会走弯路，就是section，我找到了好的英文解释：A section is a group of list items that have
+ * something in common，看到这个就应该懂了。
  */
 /*这里的ListView是可以将标签栏留在顶部，而其他的可以滚动*/
 public class PinnedSectionListView extends ListView {
@@ -55,7 +58,7 @@ public class PinnedSectionListView extends ListView {
 	/** List adapter to be implemented for being used with PinnedSectionListView adapter. */
 	public static interface PinnedSectionListAdapter extends ListAdapter {
 		/** This method shall return 'true' if views of given type has to be pinned. */
-       /*如果给定的部分被固定将会返回true*/
+       /*汗--。 我居然把这个看掉了，这个接口的实现在MainActivity,表示无语，也是根据MainActivity中的1,0来判断是不是标签项*/
 		boolean isItemViewTypePinned(int viewType);
 	}
 
@@ -78,7 +81,7 @@ public class PinnedSectionListView extends ListView {
     private MotionEvent mDownEvent;
 
     // fields used for drawing shadow under a pinned section
-    /*这里的参数用于画出固定部分下的阴影*/
+    /*这里的参数用于画出顶部标签栏下的阴影*/
     private GradientDrawable mShadowDrawable;
     private int mSectionsDistanceY;
     /*阴影的高度*/
@@ -93,7 +96,7 @@ public class PinnedSectionListView extends ListView {
     PinnedSection mRecycleSection;
 
     /** shadow instance with a pinned view, can be null. */
-    /*阴影使用的View进行实例化，可以为空*/
+    /*使用的View进行实例化，可以为空*/
     PinnedSection mPinnedSection;
 
     /** Pinned view Y-translation. We use it to stick pinned view to the next section. */
@@ -135,7 +138,7 @@ public class PinnedSectionListView extends ListView {
         /*这里是一个回调函数，当list被滚动时调用
         *附上参数含义：
         * 滚动时一直回调，直到停止滚动时才停止回调。单击时回调一次。
-        * firstVisibleItem：当前能看见的第一个列表项ID（从0开始）
+        * firstVisibleItem：当前能看见的第一个标签项ID（从0开始）,累加
         * visibleItemCount：当前能看见的列表项个数（小半个也算）
         * totalItemCount：列表项共数
         */
@@ -152,12 +155,17 @@ public class PinnedSectionListView extends ListView {
             if (adapter == null || visibleItemCount == 0) return; // nothing to do
 
 
+            /*这里的firstVisibleItem值是标签项的ID，即为1,14，等等，因为在MainActivity里面设置了ViewType数字1,0
+            *这里获取来判断是不是标签项，所以在标签位置才会显示为true*/
             final boolean isFirstVisibleItemSection =
                     isItemViewTypePinned(adapter, adapter.getItemViewType(firstVisibleItem));
             Log.d("isFirstVisibleItemSection",""+isFirstVisibleItemSection);
-            
+
+            /*判断section是否在第一个可以看见的位置
+            * 根据调试，即为判断是不是标签栏
+            */
             if (isFirstVisibleItemSection) {
-                /*getChildAt返回指定number处的View*/
+                /*getChildAt返回指定number处的View，此时的View为*/
                 View sectionView = getChildAt(0);
                 Log.d("number_two","sectionView.getTop()--->"+sectionView.getTop()+"getPaddingTop()"+getPaddingTop());
                 /*将得到的View，使用getTop()函数获取它相对整体的位置，同时与getPaddingTop()[getPaddingTop获取的数据一直
@@ -167,7 +175,9 @@ public class PinnedSectionListView extends ListView {
                     destroyPinnedShadow();
                     
                 } else { // section doesn't stick to the top, make sure we have a pinned shadow
-                    /*在section没有在顶端时，确保有个固定的阴影*/
+                    /*在section没有在顶端时，确保有个固定的阴影，此时标签虽然固定，但是还是有Item滑动，相对来说当一个Item高度没有滑完时，此时的
+                    * 标签项还是第一项，固有传递的参数firstVisibleItem相同
+                    */
                     ensureShadowForPosition(firstVisibleItem, firstVisibleItem, visibleItemCount);
                     if(null!=topView){
                      /*此时更换图片资源，请注意右上角前后图片不同*/
@@ -177,8 +187,12 @@ public class PinnedSectionListView extends ListView {
                 if(null!=topView){
                 	topView.setImageResource(R.drawable.home_menu2);
                 }
+                /*在列表项中的第一项划过后调用else部分*/
             } else { // section is not at the first visible position
+                /*此时传递的参数为firstVisibleItem同样是连续的标签项ID，得到的是标签栏的ID*/
                 int sectionPosition = findCurrentSectionPosition(firstVisibleItem);
+                Log.d("itemPosition",sectionPosition+"");
+                /*当大于-1时表示我们还有标签，即可以使用阴影;如果没有，销毁阴影，同时附上图片home_menu1*/
                 if (sectionPosition > -1) { // we have section position
                     ensureShadowForPosition(sectionPosition, firstVisibleItem, visibleItemCount);
                     
@@ -196,6 +210,7 @@ public class PinnedSectionListView extends ListView {
 	};
 
 	/** Default change observer. */
+    /*当数据发生变化时调用，这里主要是对Adapter*/
     private final DataSetObserver mDataSetObserver = new DataSetObserver() {
         @Override public void onChanged() {
             recreatePinnedShadow();
@@ -348,35 +363,49 @@ public class PinnedSectionListView extends ListView {
 
 	/** Makes sure we have an actual pinned shadow for given position. */
     /*确定阴影的位置
-    * sectionPosition: 当前能看见的第一个列表项ID(从0开始)
-    * firstVisibleItem： 第一个可见的Item的ID
+    * sectionPosition: 当前能看见的第一个列表项ID(从0开始),即为1。。。14。。等
+    * firstVisibleItem： 第一个可见的Item的ID，这里的第一的可见是相对与即时屏幕上的第一个，累加
     * visibleItemCount： 可见Item的总数
     */
     void ensureShadowForPosition(int sectionPosition, int firstVisibleItem, int visibleItemCount) {
         /*这里对于屏幕可见的item进行判断，对于只有item只有2以下的可以不用阴影*/
+        Log.d("number_one","sectionPosition:"+sectionPosition+"firstVisibleItem"+firstVisibleItem);
         if (visibleItemCount < 2) { // no need for creating shadow at all, we have a single visible item
             destroyPinnedShadow();
             return;
         }
 
+        /*这里是对阴影先判断是否为空，然后判断阴影的位置是否和标签栏的position相同，如果相同下，销毁阴影*/
         if (mPinnedSection != null
                 && mPinnedSection.position != sectionPosition) { // invalidate shadow, if required
             destroyPinnedShadow();
         }
 
+        /*如果没有阴影，生成阴影*/
         if (mPinnedSection == null) { // create shadow, if empty
             createPinnedShadow(sectionPosition);
         }
 
         // align shadow according to next section position, if needed
+        /*如果需要的话，根据下一部分的位置对齐影子*/
+        /*标签栏下个位置加1，后面长串计算就不多说了
+        * nextSectionPosition由标题的意思就可以大致明白，计算的是下一个标签栏的position
+        * 由于是从14开始，在visibleItemCount - (nextPosition - firstVisibleItem)小于14，
+        * nextSectionPosition为-1
+        */
         int nextPosition = sectionPosition + 1;
         if (nextPosition < getCount()) {
             int nextSectionPosition = findFirstVisibleSectionPosition(nextPosition,
                     visibleItemCount - (nextPosition - firstVisibleItem));
+            //Log.d("number_three","nextPosition:"+nextPosition+"add:"+(visibleItemCount - (nextPosition - firstVisibleItem)));
+            Log.d("nextSectionPosition","nextSectionPosition:"+nextSectionPosition);
             if (nextSectionPosition > -1) {
+                /*通过getTop()方法可以获取到相应Section的高度，bottom是一个Item的高度*/
                 View nextSectionView = getChildAt(nextSectionPosition - firstVisibleItem);
                 final int bottom = mPinnedSection.view.getBottom() + getPaddingTop();
                 mSectionsDistanceY = nextSectionView.getTop() - bottom;
+                //Log.d("number_four","mSectionsDistanceY:"+mSectionsDistanceY+"next:"+nextSectionView.getTop()+"bottom:"+bottom);
+                /*mSectionDistanceY这个参数大于0时，证明下个标签栏没有被覆盖，但是小于0时说明已经覆盖*/
                 if (mSectionsDistanceY < 0) {
                     // next section overlaps pinned shadow, move it up
                     mTranslateY = mSectionsDistanceY;
@@ -393,6 +422,7 @@ public class PinnedSectionListView extends ListView {
 
     }
 
+    /*这个是找到下个标签栏的函数，故直接从14开始*/
 	int findFirstVisibleSectionPosition(int firstVisibleItem, int visibleItemCount) {
 		ListAdapter adapter = getAdapter();
 		for (int childIndex = 0; childIndex < visibleItemCount; childIndex++) {
@@ -403,9 +433,11 @@ public class PinnedSectionListView extends ListView {
 		return -1;
 	}
 
+    /*这个是找到当前被回收Item的position，即为最顶部的Item*/
 	int findCurrentSectionPosition(int fromPosition) {
 		ListAdapter adapter = getAdapter();
 
+        /*instanceof前面注释有，SectionIndexer是索引，常被Adapter实现的接口,经过调试这个if没有用*/
 		if (adapter instanceof SectionIndexer) {
 			// try fast way by asking section indexer
 			SectionIndexer indexer = (SectionIndexer) adapter;
@@ -418,6 +450,7 @@ public class PinnedSectionListView extends ListView {
 		}
 
 		// try slow way by looking through to the next section item above
+       /*这里是通过寻找下一个，来使用isItemViewTypePinned函数判断是不是标签栏，当没有顶部标签栏时返回-1*/
 		for (int position=fromPosition; position>=0; position--) {
 			int viewType = adapter.getItemViewType(position);
 			if (isItemViewTypePinned(adapter, viewType)) return position;
@@ -428,10 +461,12 @@ public class PinnedSectionListView extends ListView {
     /*这里是对于固定部分阴影的重新生成*/
 	void recreatePinnedShadow() {
 	    destroyPinnedShadow();
+        //Log.d("TAG","I'm coming");
         ListAdapter adapter = getAdapter();
         if (adapter != null && adapter.getCount() > 0) {
             int firstVisiblePosition = getFirstVisiblePosition();
             int sectionPosition = findCurrentSectionPosition(firstVisiblePosition);
+            //Log.d("number_five","sectionPositon:"+sectionPosition);
             if (sectionPosition == -1) return; // no views to pin, exit
             ensureShadowForPosition(sectionPosition,
                     firstVisiblePosition, getLastVisiblePosition() - firstVisiblePosition);
@@ -449,6 +484,7 @@ public class PinnedSectionListView extends ListView {
 	}
 
 	@Override
+    /*当Activity从之前的保存状态被重新初始化会调用onRestoreInstanceState这个方法*/
 	public void onRestoreInstanceState(Parcelable state) {
 		super.onRestoreInstanceState(state);
 		post(new Runnable() {
@@ -458,6 +494,8 @@ public class PinnedSectionListView extends ListView {
 		});
 	}
 
+
+    /*在MainAcitivity中调用，传入SimpleAdapter*/
 	@Override
 	public void setAdapter(ListAdapter adapter) {
 
@@ -471,6 +509,7 @@ public class PinnedSectionListView extends ListView {
 		}
 
 		// unregister observer at old adapter and register on new one
+       /*注销旧的observer，以及注册新的*/
 		ListAdapter oldAdapter = getAdapter();
 		if (oldAdapter != null) oldAdapter.unregisterDataSetObserver(mDataSetObserver);
 		if (adapter != null) adapter.registerDataSetObserver(mDataSetObserver);
@@ -481,12 +520,14 @@ public class PinnedSectionListView extends ListView {
 		super.setAdapter(adapter);
 	}
 
+    /*覆写onLayout*/
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 	    super.onLayout(changed, l, t, r, b);
         if (mPinnedSection != null) {
             int parentWidth = r - l - getPaddingLeft() - getPaddingRight();
             int shadowWidth = mPinnedSection.view.getWidth();
+            //将parent的宽度与阴影的宽度进行对比
             if (parentWidth != shadowWidth) {
                 recreatePinnedShadow();
             }
@@ -494,6 +535,7 @@ public class PinnedSectionListView extends ListView {
 	}
 
 	@Override
+    /*覆写dispatchDraw，通过这个函数实现绘制*/
 	protected void dispatchDraw(Canvas canvas) {
 		super.dispatchDraw(canvas);
 
@@ -554,7 +596,7 @@ public class PinnedSectionListView extends ListView {
                 && isPinnedViewTouched(mPinnedSection.view, x, y)) { 
         	// create touch target
             // user touched pinned view
-            //创建触摸目标，用户触摸固定视图，坐标值mTouchPoint设置
+            //创建触摸目标，用户触摸Section视图，坐标值mTouchPoint设置
             mTouchTarget = mPinnedSection.view;
             mTouchPoint.x = x;
             mTouchPoint.y = y;
@@ -589,6 +631,7 @@ public class PinnedSectionListView extends ListView {
                     // provide correct sequence to super class for further handling
                     super.dispatchTouchEvent(mDownEvent);
                     super.dispatchTouchEvent(ev);
+                    //清除触摸对象
                     clearTouchTarget();
 
                 }
@@ -603,7 +646,8 @@ public class PinnedSectionListView extends ListView {
 		if(headView==null){
 			return super.onTouchEvent(ev);
 		}
-		
+
+       /*加入图片以及自定义的SeekBar，这里设置了头部图片，修改的话要在XML中替换资源文件*/
 		bgView = headView.findViewById(R.id.path_headimage);
 		proView=(HoloCircleSeekBar) headView.findViewById(R.id.picker);
 		
@@ -621,6 +665,7 @@ public class PinnedSectionListView extends ListView {
 					bgView.getLeft(), bgView.getBottom() + len);
 			break;
 		case MotionEvent.ACTION_MOVE:
+           //isShown当这个View可见为true
 			if (headView.isShown() && headView.getTop() >= 0) {
 				if (tool != null) {
 					int t = tool.getScrollY(y - startY);
@@ -648,12 +693,14 @@ public class PinnedSectionListView extends ListView {
         return super.dispatchTouchEvent(ev);
     }
     
-    
+    //覆写函数,layout为headview指派一个位置放图片
 	public void computeScroll() {
 		if (mScroller.computeScrollOffset()) {
 			int x = mScroller.getCurrX();
 			int y = mScroller.getCurrY();
+            Log.d("y is:",y+"");
 			bgView.layout(0, 0, x + bgView.getWidth(), y);
+           //刷新view
 			invalidate();
 			if (!mScroller.isFinished() && scrollerType && y > 200) {
 				bgView.setLayoutParams(new RelativeLayout.LayoutParams(bgView
@@ -662,23 +709,26 @@ public class PinnedSectionListView extends ListView {
 		}
 	}
 
-    /*判断固定部分是否被触摸*/
+    /*判断是否被触摸*/
     private boolean isPinnedViewTouched(View view, float x, float y) {
         view.getHitRect(mTouchRect);
 
         // by taping top or bottom padding, the list performs on click on a border item.
         // we don't add top padding here to keep behavior consistent.
         /*
-        *  通过点击顶部或者底部间距处，
+        *
         */
         mTouchRect.top += mTranslateY;
 
         mTouchRect.bottom += mTranslateY + getPaddingTop();
         mTouchRect.left += getPaddingLeft();
         mTouchRect.right -= getPaddingRight();
+        //Log.d("touchrect",mTouchRect.top+"  "+mTouchRect.bottom+"  "+mTouchRect.left+"  "+mTouchRect.right+"  ");
+        /*判断触摸点x，y是否在矩形内*/
         return mTouchRect.contains((int)x, (int)y);
     }
 
+    /*清楚触摸目标*/
     private void clearTouchTarget() {
         mTouchTarget = null;
         if (mDownEvent != null) {
@@ -686,6 +736,7 @@ public class PinnedSectionListView extends ListView {
             mDownEvent = null;
         }
     }
+
 
     private boolean performPinnedItemClick() {
         if (mPinnedSection == null) return false;
@@ -703,7 +754,7 @@ public class PinnedSectionListView extends ListView {
         return false;
     }
 
-    /*这个是对顶部Item是否固定的判断，返回boolean类型数据*/
+    /*这个是对顶部Item是否在顶部的判断，返回boolean类型数据*/
     public static boolean isItemViewTypePinned(ListAdapter adapter, int viewType) {
         /*这个是Java中的知识，instanceof是一个二元操作符，类似与==，>等，作用是测试它左边的对象
         * 是否是它右边的类的实例，返回boolean类型数据，而HeaderViewListAdapter是当ListView有一个头部View时调用;
@@ -712,7 +763,8 @@ public class PinnedSectionListView extends ListView {
         if (adapter instanceof HeaderViewListAdapter) {
             adapter = ((HeaderViewListAdapter)adapter).getWrappedAdapter();
         }
-        /*实现了PinnedSectionListAdapter的接口*/
+        /*实现了PinnedSectionListAdapter的接口，这里的viewtype即为1,0*/
+        Log.d("viewtype",viewType+"");
         return ((PinnedSectionListAdapter) adapter).isItemViewTypePinned(viewType);
     }
 
