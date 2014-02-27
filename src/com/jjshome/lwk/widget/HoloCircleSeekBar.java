@@ -37,6 +37,12 @@ import com.jjshome.lwk.myzhihu.R;
 /*
 *HoloCircleSeekBar是整个demo中的自定义的空间，是左上角的SeekBar，不过编写代码好像有些问题，
 * 有一些bug。
+*
+* 2014.2.28 add
+*
+* 这个类确实没什么说的，就是一个自定义的SeekBar，而且为了模仿知乎，采用了Canvas，我们曾经在TimeNote中使用过，所以还是比较熟悉
+* 而且这个类还有一些问题，不知道怎么回事，本来应该下拉刷新，但是这里却没有效果，具体问题，还得看一下，所以这个类就不写太多注释，这两
+* 天看的我都想吐了，代码写的很规范，但是我的水平有限。但是还是推荐大家认真看一下这个代码，相信你会取得一定收获。
  */
 /**
  * Displays a holo-themed color picker.
@@ -487,6 +493,7 @@ public class HoloCircleSeekBar extends View {
 		return conversion;
 	}
 
+    /*触摸监听*/
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		// Convert coordinates to our internal coordinate system

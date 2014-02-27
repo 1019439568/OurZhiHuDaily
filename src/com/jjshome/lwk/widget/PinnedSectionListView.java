@@ -665,7 +665,7 @@ public class PinnedSectionListView extends ListView {
 					bgView.getLeft(), bgView.getBottom() + len);
 			break;
 		case MotionEvent.ACTION_MOVE:
-           //isShown当这个View可见为true
+           //isShown当这个View可见为true，利用TouchTool来整合数据，判断顶部图片拉伸变化
 			if (headView.isShown() && headView.getTop() >= 0) {
 				if (tool != null) {
 					int t = tool.getScrollY(y - startY);
@@ -675,6 +675,7 @@ public class PinnedSectionListView extends ListView {
 					//	proView.getValue()
 					}
 				}
+              /*设置scrollerType，使拉伸不要调用函数冲突*/
 				scrollerType = false;
 			}
 			break;

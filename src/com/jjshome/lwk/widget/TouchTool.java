@@ -1,10 +1,14 @@
 package com.jjshome.lwk.widget;
+
+import android.util.Log;
+
 /**
  * Class: TouchTool.java<br>
  * Date: 2013/04/04<br>
  * Author: TiejianSha <br>
  * Email: tntshaka@gmail.com<br>
  */
+/*这个是一个工具类，但是中间yy为什么这么算我就不知道了，估计是作者试出的最佳方式*/
 public class TouchTool {
 
     private int startX, startY;
@@ -24,7 +28,9 @@ public class TouchTool {
     }
 
     public int getScrollY(float dy) {
+        //不太懂，为什么是这个样子
         int yy = (int) (startY + dy / 2.5F);
+        Log.d("yy_number:",""+yy);
         return yy;
     }
 }

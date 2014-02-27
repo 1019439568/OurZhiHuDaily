@@ -15,6 +15,10 @@ import android.widget.TextView;
 import com.jjshome.lwk.widget.PinnedSectionListView;
 import com.jjshome.lwk.widget.PinnedSectionListView.PinnedSectionListAdapter;
 
+/*花了一些时间，大致的完成对代码的注释，还有很多没有弄，主要是想换个事情做做，过几天，会把
+ * SeekBar重新做一下改进，勉强可以看，如果有问题，欢迎致电我的email：www.dai1019439568@gmail.com
+ */
+
 public class MainActivity extends Activity {
 
     /*这里定义的Item类，*/
