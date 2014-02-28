@@ -30,7 +30,7 @@ public class TouchTool {
     public int getScrollY(float dy) {
         //不太懂，为什么是这个样子
         int yy = (int) (startY + dy / 2.5F);
-        Log.d("yy_number:",""+yy);
+        //Log.d("yy_number:",""+yy);
         return yy;
     }
 }

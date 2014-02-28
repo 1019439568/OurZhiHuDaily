@@ -169,16 +169,19 @@ public class MainActivity extends Activity {
 			return view;
 		}
 
+       /*覆写了getViewTypeCount方法*/
 		@Override
 		public int getViewTypeCount() {
 			return 2;
 		}
 
+       /*覆写了getItemViewType方法*/
 		@Override
 		public int getItemViewType(int position) {
 			return getItem(position).type;
 		}
 
+       /*这里覆写了PinniedSectionListAdapter接口中的isItemViewTypePinned方法*/
 		@Override
 		public boolean isItemViewTypePinned(int viewType) {
 			return viewType == Item.SECTION;

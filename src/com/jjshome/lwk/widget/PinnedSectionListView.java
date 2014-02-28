@@ -159,7 +159,7 @@ public class PinnedSectionListView extends ListView {
             *这里获取来判断是不是标签项，所以在标签位置才会显示为true*/
             final boolean isFirstVisibleItemSection =
                     isItemViewTypePinned(adapter, adapter.getItemViewType(firstVisibleItem));
-            Log.d("isFirstVisibleItemSection",""+isFirstVisibleItemSection);
+            //Log.d("isFirstVisibleItemSection",""+isFirstVisibleItemSection);
 
             /*判断section是否在第一个可以看见的位置
             * 根据调试，即为判断是不是标签栏
@@ -167,7 +167,7 @@ public class PinnedSectionListView extends ListView {
             if (isFirstVisibleItemSection) {
                 /*getChildAt返回指定number处的View，此时的View为*/
                 View sectionView = getChildAt(0);
-                Log.d("number_two","sectionView.getTop()--->"+sectionView.getTop()+"getPaddingTop()"+getPaddingTop());
+                //Log.d("number_two","sectionView.getTop()--->"+sectionView.getTop()+"getPaddingTop()"+getPaddingTop());
                 /*将得到的View，使用getTop()函数获取它相对整体的位置，同时与getPaddingTop()[getPaddingTop获取的数据一直
                 * 为顶部,即为0]相比较，如果刚刚达到临界位置，getTop()也为0,就销毁掉阴影。
                 */
@@ -369,7 +369,7 @@ public class PinnedSectionListView extends ListView {
     */
     void ensureShadowForPosition(int sectionPosition, int firstVisibleItem, int visibleItemCount) {
         /*这里对于屏幕可见的item进行判断，对于只有item只有2以下的可以不用阴影*/
-        Log.d("number_one","sectionPosition:"+sectionPosition+"firstVisibleItem"+firstVisibleItem);
+        //Log.d("number_one","sectionPosition:"+sectionPosition+"firstVisibleItem"+firstVisibleItem);
         if (visibleItemCount < 2) { // no need for creating shadow at all, we have a single visible item
             destroyPinnedShadow();
             return;
@@ -398,7 +398,7 @@ public class PinnedSectionListView extends ListView {
             int nextSectionPosition = findFirstVisibleSectionPosition(nextPosition,
                     visibleItemCount - (nextPosition - firstVisibleItem));
             //Log.d("number_three","nextPosition:"+nextPosition+"add:"+(visibleItemCount - (nextPosition - firstVisibleItem)));
-            Log.d("nextSectionPosition","nextSectionPosition:"+nextSectionPosition);
+            //Log.d("nextSectionPosition","nextSectionPosition:"+nextSectionPosition);
             if (nextSectionPosition > -1) {
                 /*通过getTop()方法可以获取到相应Section的高度，bottom是一个Item的高度*/
                 View nextSectionView = getChildAt(nextSectionPosition - firstVisibleItem);
@@ -699,7 +699,7 @@ public class PinnedSectionListView extends ListView {
 		if (mScroller.computeScrollOffset()) {
 			int x = mScroller.getCurrX();
 			int y = mScroller.getCurrY();
-            Log.d("y is:",y+"");
+           //Log.d("y is:",y+"");
 			bgView.layout(0, 0, x + bgView.getWidth(), y);
            //刷新view
 			invalidate();
@@ -764,8 +764,8 @@ public class PinnedSectionListView extends ListView {
         if (adapter instanceof HeaderViewListAdapter) {
             adapter = ((HeaderViewListAdapter)adapter).getWrappedAdapter();
         }
-        /*实现了PinnedSectionListAdapter的接口，这里的viewtype即为1,0*/
-        Log.d("viewtype",viewType+"");
+        //调用了PinnedSectionListAdapter接口中的方法，这里的viewtype即为1,0*/
+        //Log.d("viewtype",viewType+"");
         return ((PinnedSectionListAdapter) adapter).isItemViewTypePinned(viewType);
     }
 
